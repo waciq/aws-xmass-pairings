@@ -55,13 +55,16 @@ def pairings():
     return pairs
 
 def mailer():
+    ssm = boto3.client('ssm', region_name="eu-west-1")
+    parameterUrl = ssm.get_parameter(Name='/xmass/folderurl', WithDecryption=True)
+    folderUrl = parameterUrl['Parameter']['Value']
     for name, address in emailaddresses.items():
         msg = EmailMessage()
         S = 'Witaj %s!' % (name)
         msg['From'] = 'pjpietraszuk@gmail.com'
         msg['To'] = address
         msg['Subject'] = S
-        msg.set_content("Witaj " + name + "!" + "\n Wylosowana dla ciebie osoba to: " + str(pairs[name]))  #content of hte message
+        msg.set_content("Witaj " + name + "!" + "\n Wylosowana dla ciebie osoba to: " + str(pairs[name]) + "\n \n Oto link do folderu gdzie znajdziesz to, co " + str(pairs[name]) + " chce otrzymać: \n \n" + folderUrl)  #content of hte message
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
         server.login(gmail_user, gmail_password)
